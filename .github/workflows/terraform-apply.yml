@@ -27,12 +27,21 @@ jobs:
         with:
           terraform_version: "~1.10"
 
-      - name: Terraform Init
-        working-directory: infra
-        run: terraform init
-
-      - name: Terraform Apply
-        working-directory: infra
+      - name: Deploy VPC
+        working-directory: infra/vpc
         run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Deploy RDS
+        working-directory: infra/rds
+        run: |
+          terraform init
           terraform apply -auto-approve \
             -var="db_password=${{ secrets.DB_PASSWORD }}"
+
+      - name: Deploy EC2
+        working-directory: infra/ec2
+        run: |
+          terraform init
+          terraform apply -auto-approve

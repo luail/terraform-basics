@@ -8,6 +8,10 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: ["infra/vpc", "infra/ec2", "infra/rds"]
     permissions:
       contents: read
       pull-requests: write
@@ -29,15 +33,15 @@ jobs:
           terraform_version: "~1.10"
 
       - name: Terraform Init
-        working-directory: infra
+        working-directory: ${{ matrix.directory }}
         run: terraform init
 
       - name: Terraform Format Check
-        working-directory: infra
+        working-directory: ${{ matrix.directory }}
         run: terraform fmt -check
 
       - name: Terraform Validate
-        working-directory: infra
+        working-directory: ${{ matrix.directory }}
         run: terraform validate
 
       - name: Setup TFLint
@@ -46,16 +50,16 @@ jobs:
           tflint_version: v0.50.0
 
       - name: Init TFLint
-        working-directory: infra
-        run: tflint --init
+        working-directory: ${{ matrix.directory }}
+        run: tflint --init --config=../.tflint.hcl
 
       - name: Run TFLint
-        working-directory: infra
-        run: tflint -f compact
+        working-directory: ${{ matrix.directory }}
+        run: tflint -f compact --config=../.tflint.hcl
 
       - name: Terraform Plan
         id: plan
-        working-directory: infra
+        working-directory: ${{ matrix.directory }}
         run: |
           terraform plan -no-color \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
@@ -67,9 +71,9 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const planOutput = fs.readFileSync('infra/plan_output.txt', 'utf8');
+            const planOutput = fs.readFileSync('${{ matrix.directory }}/plan_output.txt', 'utf8');
             const planStatus = '${{ steps.plan.outcome }}';
-            const body = `## Terraform Plan
+            const body = `## Terraform Plan for \`${{ matrix.directory }}\`
             **Status:** ${planStatus === 'success' ? 'Success' : 'Failed'}
 
             <details><summary>Plan Output</summary>
