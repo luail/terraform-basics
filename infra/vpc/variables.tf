@@ -28,8 +28,8 @@ variable "public_subnet_2_cidr" {
   default     = "10.0.1.0/24"
 }
 
-variable "tflint_test_unused" {
-  description = "TFLint unused variable test"
-  type        = string
-  default     = "test-trigger"
-}
+# variable "tflint_test_unused" {
+#   description = "TFLint 테스트"
+#   type        = string
+#   default     = "test"
+# }
