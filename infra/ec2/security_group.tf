@@ -1,0 +1,33 @@
+# EC2 보안그룹
+resource "aws_security_group" "ec2" {
+  name   = "${var.project}-ec2-sg"
+  vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id # VPC 모듈의 Output 속성인 vpc_id를 참조하여 바인딩
+
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project}-ec2-sg"
+  }
+}

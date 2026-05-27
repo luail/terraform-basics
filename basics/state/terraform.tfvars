@@ -1,0 +1,4 @@
+
+env              = "dev"
+greeting_message = "Hello, Terraform!"
+secret_token     = "my-secret-token"
