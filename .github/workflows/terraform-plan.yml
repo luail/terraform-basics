@@ -6,12 +6,35 @@ on:
       - "infra/**"
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      directories: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Path Filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            infra/vpc:
+              - 'infra/vpc/**'
+            infra/ec2:
+              - 'infra/ec2/**'
+            infra/rds:
+              - 'infra/rds/**'
+
   plan:
+    needs: changes
+    if: ${{ needs.changes.outputs.directories != '[]' && needs.changes.outputs.directories != '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        directory: ["infra/vpc", "infra/ec2", "infra/rds"]
+        directory: ${{ fromJSON(needs.changes.outputs.directories) }}
     permissions:
       contents: read
       pull-requests: write

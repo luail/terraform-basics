@@ -15,7 +15,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Path Filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            vpc:
+              - 'infra/vpc/**'
+            ec2:
+              - 'infra/ec2/**'
+            rds:
+              - 'infra/rds/**'
+
       - name: Configure AWS credentials
+        if: steps.filter.outputs.vpc == 'true' || steps.filter.outputs.ec2 == 'true' || steps.filter.outputs.rds == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -23,23 +36,27 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: Setup Terraform
+        if: steps.filter.outputs.vpc == 'true' || steps.filter.outputs.ec2 == 'true' || steps.filter.outputs.rds == 'true'
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.15.4"
 
       - name: Deploy VPC
+        if: steps.filter.outputs.vpc == 'true'
         working-directory: infra/vpc
         run: |
           terraform init
           terraform apply -auto-approve
 
       - name: Deploy EC2
+        if: steps.filter.outputs.ec2 == 'true'
         working-directory: infra/ec2
         run: |
           terraform init
           terraform apply -auto-approve
 
       - name: Deploy RDS
+        if: steps.filter.outputs.rds == 'true'
         working-directory: infra/rds
         run: |
           terraform init
