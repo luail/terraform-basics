@@ -7,3 +7,7 @@ plugin "aws" {
 rule "aws_instance_invalid_type" {
   enabled = true
 }
+
+rule "terraform_unused_declarations" {
+  enabled = true
+}
