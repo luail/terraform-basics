@@ -33,15 +33,15 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
+      - name: Deploy EC2
+        working-directory: infra/ec2
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
       - name: Deploy RDS
         working-directory: infra/rds
         run: |
           terraform init
           terraform apply -auto-approve \
             -var="db_password=${{ secrets.DB_PASSWORD }}"
-
-      - name: Deploy EC2
-        working-directory: infra/ec2
-        run: |
-          terraform init
-          terraform apply -auto-approve
